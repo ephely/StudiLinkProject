@@ -1,0 +1,6 @@
+.env
+ADMIN_GUIDE.md
+seeds
+node_modules
+db
+migrations

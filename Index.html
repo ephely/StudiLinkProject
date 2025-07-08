@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudiLink - Accueil</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+        color: #333;
+      }
+
+      header {
+        background: linear-gradient(
+          to right,
+          #479aff,
+          #4fff92
+        ); /* bleu -> vert */
+        padding: 20px;
+        text-align: center;
+        color: white;
+      }
+
+      nav {
+        margin-top: 10px;
+      }
+
+      nav a {
+        color: white;
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .hero {
+        padding: 60px 20px;
+        text-align: center;
+      }
+
+      .hero h1 {
+        color: #4fa4ff;
+        font-size: 2.5em;
+      }
+
+      .hero p {
+        font-size: 1.2em;
+        color: #555;
+      }
+
+      .cta-button {
+        background-color: #54e077;
+        border: none;
+        color: white;
+        padding: 15px 30px;
+        font-size: 1em;
+        border-radius: 30px;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+
+      .cta-button:hover {
+        background-color: #33beff;
+      }
+
+      .offers-section {
+        padding: 40px 20px;
+        background-color: #f9f9f9;
+      }
+
+      .offers-section h2 {
+        color: #4fa4ff;
+        text-align: center;
+      }
+
+      .offer-cards {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .card {
+        background-color: white;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 20px;
+        width: 250px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .card h3 {
+        color: #2bed00;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        background-color: #f1f1f1;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>StudiLink</h1>
+      <nav>
+        <a href="#">Home</a>
+        <a href="#">Job offers</a>
+        <a href="#">Profil</a>
+        <a href="#">Login</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <h1>Find the student job you need in one place</h1>
+      <p>
+        Internships, missions, volunteering — StudiLink connects you to best
+        opportunities.
+      </p>
+      <button class="cta-button">Starts now</button>
+    </div>
+
+    <section class="offers-section">
+      <h2>Most recent offers</h2>
+      <div class="offer-cards">
+        <div class="card">
+          <h3>Internship - Web Designer</h3>
+          <p>6 months - Paris, France</p>
+        </div>
+        <div class="card">
+          <h3>Mission - Event</h3>
+          <p>2 days - New York, USA</p>
+        </div>
+        <div class="card">
+          <h3>Internship - Marketing</h3>
+          <p>1 year - Lyon, France</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>© 2025 StudiLink. All rights reserved.</footer>
+  </body>
+</html>
