@@ -94,9 +94,6 @@ export default function JobOffers() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="section-title">Student Job Offers</h1>
-          <p className="section-subtitle">
-            Find the student job that suits you among {pagination.total} available offers
-          </p>
         </div>
 
         {/* Filtres */}
@@ -219,7 +216,7 @@ export default function JobOffers() {
                           {formatSalary(offer.salary_min, offer.salary_max, offer.salary_currency)}
                         </div>
                         <div className="offer-date">
-                          Publié le {new Date(offer.created_at).toLocaleDateString('fr-FR')}
+                          Published on {new Date(offer.created_at).toLocaleDateString('fr-FR')}
                         </div>
                       </div>
                     </div>
@@ -231,18 +228,18 @@ export default function JobOffers() {
                     <div className="offer-footer">
                       <div className="offer-tags">
                         {offer.job_type === 'internship' && (
-                          <span className="tag tag-internship">Stage</span>
+                          <span className="tag tag-internship">Internship</span>
                         )}
                         {offer.job_type === 'part_time' && (
-                          <span className="tag tag-part-time">Temps partiel</span>
+                          <span className="tag tag-part-time">Part-time</span>
                         )}
                         {offer.remote_option === 'remote' && (
-                          <span className="tag tag-remote">Télétravail</span>
+                          <span className="tag tag-remote">Remote</span>
                         )}
                       </div>
 
                       <Link to={`/offers/${offer.id}`} className="view-offer-button">
-                        Voir l'offre
+                        View Offer
                       </Link>
                     </div>
                   </div>
@@ -258,7 +255,7 @@ export default function JobOffers() {
                       disabled={pagination.page === 1}
                       className="pagination-button"
                     >
-                      Précédent
+                      Previous
                     </button>
                     
                     {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
@@ -279,7 +276,7 @@ export default function JobOffers() {
                       disabled={pagination.page === pagination.pages}
                       className="pagination-button"
                     >
-                      Suivant
+                      Next
                     </button>
                   </nav>
                 </div>

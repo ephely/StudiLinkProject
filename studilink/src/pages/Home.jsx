@@ -6,7 +6,7 @@ export default function Home() {
   const [stats, setStats] = useState({
     totalOffers: 0,
     totalCompanies: 0,
-    totalStudents: 0
+    totalStudents: 0,
   });
 
   useEffect(() => {
@@ -30,9 +30,9 @@ export default function Home() {
     // Pour l'instant, on utilise des données fictives
     // Dans une vraie application, on ferait un appel API
     setStats({
-      totalOffers: 156,
-      totalCompanies: 89,
-      totalStudents: 1247
+      totalOffers: 5,
+      totalCompanies: 5,
+      totalStudents: 13,
     });
   };
 
@@ -41,7 +41,7 @@ export default function Home() {
       internship: 'Internship',
       part_time: 'Part-time',
       full_time: 'Full-time',
-      freelance: 'Freelance'
+      freelance: 'Freelance',
     };
     return types[type] || type;
   };
@@ -52,24 +52,21 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-container">
           <h1 className="hero-title">
-            Find the student job
-            <span style={{ display: 'block', color: '#e0ffe7' }}>of your dreams</span>
+            Find the student job of your dreams
           </h1>
           <p className="hero-subtitle">
-            Internships, part-time, freelance... StudiLink connects students to the best professional opportunities.
+            Internships, part-time, freelance... StudiLink connects students to
+            the best professional opportunities.
           </p>
           <div className="hero-buttons">
             <Link to="/offers" className="hero-primary-button">
               View Jobs
             </Link>
-            <Link to="/create-offer" className="hero-secondary-button">
-              Post a Job
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* Statistiques */}
+      {/* Stats */}
       <section className="stats-section">
         <div className="stats-container">
           <div className="stats-grid">
@@ -113,84 +110,21 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <p className="offer-description line-clamp-3">
                     {offer.description}
                   </p>
-                  
-                  <Link to={`/offers/${offer.id}`} className="view-offer-button">
+
+                  <Link
+                    to={`/offers/${offer.id}`}
+                    className="view-offer-button"
+                  >
                     View Job
                   </Link>
                 </div>
               ))
             ) : (
-              // Offres fictives pour la démo
-              <>
-                <div className="offer-card">
-                  <div className="offer-header">
-                    <div className="offer-info">
-                      <h3 className="offer-title">Full Stack Web Developer</h3>
-                      <p className="offer-company">TechStartup</p>
-                      <div className="offer-meta">
-                        <span>📍 Paris, France</span>
-                        <span>💼 Internship</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="offer-description">
-                    We are looking for a passionate developer 
-                    to join our team and participate 
-                    in the development of our innovative web applications.
-                  </p>
-
-                  <Link to="/offers" className="view-offer-button">
-                    View Job
-                  </Link>
-                </div>
-
-                <div className="offer-card">
-                  <div className="offer-header">
-                    <div className="offer-info">
-                      <h3 className="offer-title">Digital Marketing Assistant</h3>
-                      <p className="offer-company">MarketingPro</p>
-                      <div className="offer-meta">
-                        <span>📍 Lyon, France</span>
-                        <span>💼 Part-time</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="offer-description">
-                    Join our marketing team to manage our social networks and online advertising campaigns.
-                  </p>
-                  
-                  <Link to="/offers" className="view-offer-button">
-                    View Job
-                  </Link>
-                </div>
-
-                <div className="offer-card">
-                  <div className="offer-header">
-                    <div className="offer-info">
-                      <h3 className="offer-title">UX/UI Designer</h3>
-                      <p className="offer-company">CreativeStudio</p>
-                      <div className="offer-meta">
-                        <span>📍 Remote</span>
-                        <span>💼 Freelance</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="offer-description">
-                    We are looking for a creative designer to design modern and intuitive user interfaces.
-                  </p>
-                  
-                  <Link to="/offers" className="view-offer-button">
-                    View Job
-                  </Link>
-                </div>
-              </>
+              <p>No recent offers for the moment.</p>
             )}
           </div>
 
@@ -208,7 +142,8 @@ export default function Home() {
           <div className="section-header">
             <h2 className="section-title">Why Choose StudiLink?</h2>
             <p className="section-subtitle">
-              Our platform offers simple and effective tools to connect students and employers
+              Our platform offers simple and effective tools to connect students
+              and employers
             </p>
           </div>
 
@@ -233,7 +168,8 @@ export default function Home() {
               <div className="feature-icon">💼</div>
               <h3 className="feature-title">Varied Opportunities</h3>
               <p className="feature-description">
-                Internships, part-time, freelance... Find the format that suits you
+                Internships, part-time, freelance... Find the format that suits
+                you
               </p>
             </div>
           </div>
@@ -245,13 +181,14 @@ export default function Home() {
         <div className="cta-container">
           <h2 className="cta-title">Ready to find your next student job?</h2>
           <p className="cta-subtitle">
-            Join thousands of students who have already found their opportunity on StudiLink
+            Join thousands of students who have already found their opportunity
+            on StudiLink
           </p>
           <div className="cta-buttons">
             <Link to="/offers" className="hero-primary-button">
               Start Searching
             </Link>
-            <Link to="/login" className="hero-secondary-button">
+            <Link to="/register" className="hero-secondary-button">
               Create Account
             </Link>
           </div>

@@ -67,27 +67,27 @@ export default function CreateJobOffer() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="create-job">
+      <div className="create-job-container">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="create-job-header">
+          <h1 className="create-job-title">
             Post a Job Offer
           </h1>
-          <p className="text-gray-600">
+          <p className="create-job-subtitle">
             Create a job offer to attract the best students
           </p>
         </div>
 
         {/* Formulaire */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="create-job-form-container">
+          <form onSubmit={handleSubmit} className="create-job-form">
             {/* Informations de base */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="create-job-section">
+              <h2 className="create-job-section-title">Basic Information</h2>
+              <div className="create-job-grid">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Job Title *
                   </label>
                   <input
@@ -96,13 +96,13 @@ export default function CreateJobOffer() {
                     value={formData.title}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="ex: Full Stack Web Developer"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Company *
                   </label>
                   <input
@@ -111,13 +111,13 @@ export default function CreateJobOffer() {
                     value={formData.company}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="ex: My Startup"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Location *
                   </label>
                   <input
@@ -126,13 +126,13 @@ export default function CreateJobOffer() {
                     value={formData.location}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="ex: Paris, France"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Contract Type *
                   </label>
                   <select
@@ -140,7 +140,7 @@ export default function CreateJobOffer() {
                     value={formData.job_type}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                   >
                     <option value="internship">Internship</option>
                     <option value="part_time">Part-time</option>
@@ -149,8 +149,8 @@ export default function CreateJobOffer() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Duration
                   </label>
                   <input
@@ -158,20 +158,20 @@ export default function CreateJobOffer() {
                     name="duration"
                     value={formData.duration}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="ex: 6 months, 1 year"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Work Mode
                   </label>
                   <select
                     name="remote_option"
                     value={formData.remote_option}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                   >
                     <option value="on_site">On-site</option>
                     <option value="remote">Remote</option>
@@ -182,11 +182,11 @@ export default function CreateJobOffer() {
             </div>
 
             {/* Rémunération */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Compensation</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="create-job-section">
+              <h2 className="create-job-section-title">Compensation</h2>
+              <div className="create-job-grid create-job-grid-3">
+                <div className="create-job-field">
+                  <label className="create-job-label">
                     Minimum Salary
                   </label>
                   <input
@@ -194,34 +194,34 @@ export default function CreateJobOffer() {
                     name="salary_min"
                     value={formData.salary_min}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="ex: 1500"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Salaire maximum
+                <div className="create-job-field">
+                  <label className="create-job-label">
+                    Maximum Salary
                   </label>
                   <input
                     type="number"
                     name="salary_max"
                     value={formData.salary_max}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="ex: 2500"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Devise
+                <div className="create-job-field">
+                  <label className="create-job-label">
+                    Currency
                   </label>
                   <select
                     name="salary_currency"
                     value={formData.salary_currency}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                   >
                     <option value="EUR">EUR (€)</option>
                     <option value="USD">USD ($)</option>
@@ -232,11 +232,11 @@ export default function CreateJobOffer() {
             </div>
 
             {/* Description */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Description du poste</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description détaillée *
+            <div className="create-job-section">
+              <h2 className="create-job-section-title">Job Description</h2>
+              <div className="create-job-field">
+                <label className="create-job-label">
+                  Detailed Description *
                 </label>
                 <textarea
                   name="description"
@@ -244,90 +244,90 @@ export default function CreateJobOffer() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Décrivez en détail le poste, les missions principales, l'environnement de travail..."
+                  className="create-job-textarea"
+                  placeholder="Describe in detail the position, main missions, work environment..."
                 />
               </div>
             </div>
 
             {/* Profil recherché */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Profil recherché</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Compétences et expériences requises
+            <div className="create-job-section">
+              <h2 className="create-job-section-title">Required Profile</h2>
+              <div className="create-job-field">
+                <label className="create-job-label">
+                  Skills and Experience Required
                 </label>
                 <textarea
                   name="requirements"
                   value={formData.requirements}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Listez les compétences techniques, les langues, les expériences souhaitées..."
+                  className="create-job-textarea"
+                  placeholder="List technical skills, languages, desired experience..."
                 />
               </div>
             </div>
 
             {/* Avantages */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Avantages</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Avantages et bénéfices
+            <div className="create-job-section">
+              <h2 className="create-job-section-title">Benefits</h2>
+              <div className="create-job-field">
+                <label className="create-job-label">
+                  Benefits and Perks
                 </label>
                 <textarea
                   name="benefits"
                   value={formData.benefits}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Avantages sociaux, formations, évolution de carrière, environnement de travail..."
+                  className="create-job-textarea"
+                  placeholder="Social benefits, training, career development, work environment..."
                 />
               </div>
             </div>
 
             {/* Contact */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations de contact</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email de contact
+            <div className="create-job-section">
+              <h2 className="create-job-section-title">Contact Information</h2>
+              <div className="create-job-grid">
+                <div className="create-job-field">
+                  <label className="create-job-label">
+                    Contact Email
                   </label>
                   <input
                     type="email"
                     name="contact_email"
                     value={formData.contact_email}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="contact@entreprise.com"
+                    className="create-job-input"
+                    placeholder="contact@company.com"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Téléphone de contact
+                <div className="create-job-field">
+                  <label className="create-job-label">
+                    Contact Phone
                   </label>
                   <input
                     type="tel"
                     name="contact_phone"
                     value={formData.contact_phone}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="+33 1 23 45 67 89"
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lien de candidature externe (optionnel)
+                <div className="create-job-field create-job-field-full">
+                  <label className="create-job-label">
+                    External Application Link (optional)
                   </label>
                   <input
                     type="url"
                     name="application_url"
                     value={formData.application_url}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="create-job-input"
                     placeholder="https://..."
                   />
                 </div>
@@ -335,20 +335,20 @@ export default function CreateJobOffer() {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div className="create-job-actions">
               <button
                 type="button"
                 onClick={() => navigate('/offers')}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                className="create-job-cancel-btn"
               >
-                Annuler
+                Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="create-job-submit-btn"
               >
-                {loading ? 'Publication...' : 'Publier l\'offre'}
+                {loading ? 'Publishing...' : 'Publish Offer'}
               </button>
             </div>
           </form>

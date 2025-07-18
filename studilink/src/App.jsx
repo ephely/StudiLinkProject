@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import UpdateProfile from './pages/UpdateProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import Register from './pages/Register';
+import ApplicationView from './pages/ApplicationView';
 
 function App() {
   return (
@@ -19,8 +21,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/offers" element={<JobOffers />} />
         <Route path="/offers/:id" element={<JobOfferDetail />} />
+        <Route path="/offers/:id/applications" element={<ApplicationView />} />
         <Route path="/create-offer" element={<CreateJobOffer />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/update" element={<UpdateProfile />} />
         <Route path="/admin" element={<AdminDashboard />} />

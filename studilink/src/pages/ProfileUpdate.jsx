@@ -26,7 +26,7 @@ export default function ProfileUpdate() {
 
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Non connecté !');
+      alert('Not connected!');
       return;
     }
 
@@ -45,19 +45,19 @@ export default function ProfileUpdate() {
 
       const result = await res.json();
 
-      if (!res.ok) throw new Error(result.error || 'Erreur de mise à jour');
+      if (!res.ok) throw new Error(result.error || 'Update error');
 
-      setMessage('Profil mis à jour !');
+      setMessage('Profile updated!');
       navigate('/profile');
     } catch (err) {
       console.error(err);
-      setMessage('Erreur : ' + err.message);
+      setMessage('Error: ' + err.message);
     }
   };
 
   return (
     <main style={{ padding: '2rem' }}>
-      <h2>Mise à jour du profil</h2>
+      <h2>Profile update</h2>
       <form
         onSubmit={handleSubmit}
         encType="multipart/form-data"
@@ -68,12 +68,12 @@ export default function ProfileUpdate() {
           maxWidth: '400px',
         }}
       >
-        <input name="first_name" placeholder="Prénom" onChange={handleChange} />
-        <input name="last_name" placeholder="Nom" onChange={handleChange} />
-        <input name="location" placeholder="Ville" onChange={handleChange} />
+        <input name="first_name" placeholder="First name" onChange={handleChange} />
+        <input name="last_name" placeholder="Last name" onChange={handleChange} />
+        <input name="location" placeholder="City" onChange={handleChange} />
         <input
           name="skills"
-          placeholder="Compétences"
+          placeholder="Skills"
           onChange={handleChange}
         />
         <textarea
@@ -83,7 +83,7 @@ export default function ProfileUpdate() {
           onChange={handleChange}
         />
         <input type="file" accept="image/*" onChange={handleFileChange} />
-        <button type="submit">Mettre à jour</button>
+        <button type="submit">Update</button>
         {message && <p>{message}</p>}
       </form>
     </main>

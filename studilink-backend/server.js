@@ -7,7 +7,7 @@ const multer = require('multer');
 const path = require('path');
 const authenticateToken = require('./authenticateToken');
 
-// Middleware pour vérifier si l'utilisateur est un employeur
+// Utilisateur est un employeur
 const isEmployer = async (req, res, next) => {
   try {
     const user = await knex('users').where({ id: req.user.userId }).first();
@@ -20,12 +20,14 @@ const isEmployer = async (req, res, next) => {
   }
 };
 
-// Middleware pour vérifier si l'utilisateur est un admin
+// Utilisateur est un admin
 const isAdmin = async (req, res, next) => {
   try {
     const user = await knex('users').where({ id: req.user.userId }).first();
     if (user.role !== 'admin') {
-      return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
+      return res
+        .status(403)
+        .json({ error: 'Accès réservé aux administrateurs' });
     }
     next();
   } catch (err) {
@@ -40,24 +42,27 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Route pour télécharger le CV d'un utilisateur
+// Télécharger le CV d'un utilisateur
 app.get('/profile/:userId/cv', authenticateToken, async (req, res) => {
   try {
     const user = await knex('users').where({ id: req.params.userId }).first();
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     if (!user.cv_url) {
       return res.status(404).json({ error: 'CV not found' });
     }
-    
-    // Vérifier que l'utilisateur peut accéder au CV (soi-même ou employeur)
-    if (req.user.userId !== parseInt(req.params.userId) && user.role !== 'employer') {
+
+    // Accéder au CV (soi-même ou employeur)
+    if (
+      req.user.userId !== parseInt(req.params.userId) &&
+      user.role !== 'employer'
+    ) {
       return res.status(403).json({ error: 'Access denied' });
     }
-    
+
     const filePath = path.join(__dirname, user.cv_url);
     res.download(filePath, user.cv_filename || 'cv.pdf');
   } catch (err) {
@@ -68,10 +73,25 @@ app.get('/profile/:userId/cv', authenticateToken, async (req, res) => {
 
 // Register
 app.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role, firstName, lastName, companyName, companySector, companyLocation, companyPosition } = req.body;
   const hashed = await bcrypt.hash(password, 10);
   try {
-    await knex('users').insert({ email, password: hashed });
+    const userData = { 
+      email, 
+      password: hashed, 
+      role: role || 'student',
+      first_name: firstName,
+      last_name: lastName
+    };
+    
+    // Si c'est un employeur, on peut stocker les infos de l'entreprise
+    if (role === 'employer') {
+      userData.location = companyLocation;
+      userData.skills = companySector;
+      userData.bio = `Company: ${companyName}\nSector: ${companySector}\nLocation: ${companyLocation}${companyPosition ? `\nPosition: ${companyPosition}` : ''}`;
+    }
+    
+    await knex('users').insert(userData);
     res.status(201).json({ message: 'Utilisateur inscrit !' });
   } catch (err) {
     console.error(err);
@@ -101,15 +121,30 @@ app.get('/profile', authenticateToken, async (req, res) => {
   res.json(user);
 });
 
-// Config Multer pour avatars et CV
+// Delete Account
+app.delete('/profile/delete', authenticateToken, async (req, res) => {
+  try {
+    // Supprimer toutes les données liées à l'utilisateur
+    await knex('applications').where({ student_id: req.user.userId }).del();
+    await knex('job_offers').where({ employer_id: req.user.userId }).del();
+    await knex('users').where({ id: req.user.userId }).del();
+    
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error deleting account' });
+  }
+});
+
+// Config Multer pour PP et CV
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/cvs/');
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, 'cv-' + uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 // Filtre pour les types de fichiers acceptés
@@ -122,12 +157,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024
-  }
+    fileSize: 5 * 1024 * 1024,
+  },
 });
 
 // Update Profile
@@ -137,10 +172,10 @@ app.post(
   upload.single('cv'),
   async (req, res) => {
     const { first_name, last_name, location, skills, bio } = req.body;
-    
+
     try {
       const updateData = { first_name, last_name, location, skills, bio };
-      
+
       // Gérer l'upload de CV
       if (req.file) {
         updateData.cv_url = '/uploads/cvs/' + req.file.filename;
@@ -149,10 +184,10 @@ app.post(
 
       await knex('users').where({ id: req.user.userId }).update(updateData);
 
-      res.json({ 
-        message: 'Profile updated successfully', 
+      res.json({
+        message: 'Profile updated successfully',
         cv_url: updateData.cv_url,
-        cv_filename: updateData.cv_filename
+        cv_filename: updateData.cv_filename,
       });
     } catch (err) {
       console.error(err);
@@ -163,80 +198,96 @@ app.post(
 
 // Routes pour les offres d'emploi
 
-// Obtenir toutes les offres d'emploi actives
+// Toutes les offres d'emploi actives
 app.get('/job-offers', async (req, res) => {
   try {
-    const { 
-      job_type, 
-      location, 
-      remote_option, 
+    const {
+      job_type,
+      location,
+      remote_option,
       search,
       page = 1,
-      limit = 10
+      limit = 10,
+      mine
     } = req.query;
-    
+
     let query = knex('job_offers')
       .where('is_active', true)
       .orderBy('created_at', 'desc');
-    
+
     if (job_type) {
       query = query.where('job_type', job_type);
     }
-    
+
     if (location) {
       query = query.where('location', 'like', `%${location}%`);
     }
-    
+
     if (remote_option) {
       query = query.where('remote_option', remote_option);
     }
-    
+
     if (search) {
-      query = query.where(function() {
+      query = query.where(function () {
         this.where('title', 'like', `%${search}%`)
           .orWhere('description', 'like', `%${search}%`)
           .orWhere('company', 'like', `%${search}%`);
       });
     }
-    
+
+    // Si mine=1, ne retourner que les offres de l'employeur connecté (si authentifié)
+    if (mine && req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+        query = query.where('employer_id', decoded.userId);
+      } catch (e) {
+        return res.status(401).json({ error: 'Invalid or missing token' });
+      }
+    }
+
     const offset = (page - 1) * limit;
     const offers = await query.limit(limit).offset(offset);
     const total = await query.clone().count('* as count').first();
-    
+
     res.json({
       offers,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total: total.count,
-        pages: Math.ceil(total.count / limit)
-      }
+        pages: Math.ceil(total.count / limit),
+      },
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des offres' });
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des offres' });
   }
 });
 
-// Obtenir une offre d'emploi spécifique
+// Offre d'emploi spécifique
 app.get('/job-offers/:id', async (req, res) => {
   try {
     const offer = await knex('job_offers')
       .where({ id: req.params.id, is_active: true })
       .first();
-    
+
     if (!offer) {
-      return res.status(404).json({ error: 'Offre d\'emploi introuvable' });
+      return res.status(404).json({ error: "Offre d'emploi introuvable" });
     }
-    
+
     res.json(offer);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération de l\'offre' });
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la récupération de l'offre" });
   }
 });
 
-// Créer une nouvelle offre d'emploi (employeurs seulement)
+// Créer nouvelle offre d'emploi (employeurs seulement)
 app.post('/job-offers', authenticateToken, isEmployer, async (req, res) => {
   try {
     const {
@@ -254,9 +305,9 @@ app.post('/job-offers', authenticateToken, isEmployer, async (req, res) => {
       benefits,
       contact_email,
       contact_phone,
-      application_url
+      application_url,
     } = req.body;
-    
+
     const [offerId] = await knex('job_offers').insert({
       title,
       description,
@@ -273,62 +324,74 @@ app.post('/job-offers', authenticateToken, isEmployer, async (req, res) => {
       contact_email,
       contact_phone,
       application_url,
-      employer_id: req.user.userId
+      employer_id: req.user.userId,
     });
-    
+
     const newOffer = await knex('job_offers').where({ id: offerId }).first();
     res.status(201).json(newOffer);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la création de l\'offre' });
+    res.status(500).json({ error: "Erreur lors de la création de l'offre" });
   }
 });
 
-// Mettre à jour une offre d'emploi (employeur propriétaire seulement)
+// Update une offre d'emploi (employeur propriétaire seulement)
 app.put('/job-offers/:id', authenticateToken, isEmployer, async (req, res) => {
   try {
     const offer = await knex('job_offers')
       .where({ id: req.params.id, employer_id: req.user.userId })
       .first();
-    
+
     if (!offer) {
-      return res.status(404).json({ error: 'Offre d\'emploi introuvable ou non autorisée' });
+      return res
+        .status(404)
+        .json({ error: "Offre d'emploi introuvable ou non autorisée" });
     }
-    
+
     await knex('job_offers')
       .where({ id: req.params.id })
       .update({
         ...req.body,
-        updated_at: knex.fn.now()
+        updated_at: knex.fn.now(),
       });
-    
-    const updatedOffer = await knex('job_offers').where({ id: req.params.id }).first();
+
+    const updatedOffer = await knex('job_offers')
+      .where({ id: req.params.id })
+      .first();
     res.json(updatedOffer);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'offre' });
+    res.status(500).json({ error: "Erreur lors de la mise à jour de l'offre" });
   }
 });
 
-// Supprimer une offre d'emploi (employeur propriétaire seulement)
-app.delete('/job-offers/:id', authenticateToken, isEmployer, async (req, res) => {
-  try {
-    const offer = await knex('job_offers')
-      .where({ id: req.params.id, employer_id: req.user.userId })
-      .first();
-    
-    if (!offer) {
-      return res.status(404).json({ error: 'Offre d\'emploi introuvable ou non autorisée' });
+// Supprimer offre d'emploi (employeur propriétaire seulement)
+app.delete(
+  '/job-offers/:id',
+  authenticateToken,
+  isEmployer,
+  async (req, res) => {
+    try {
+      const offer = await knex('job_offers')
+        .where({ id: req.params.id, employer_id: req.user.userId })
+        .first();
+
+      if (!offer) {
+        return res
+          .status(404)
+          .json({ error: "Offre d'emploi introuvable ou non autorisée" });
+      }
+
+      await knex('job_offers').where({ id: req.params.id }).delete();
+      res.json({ message: "Offre d'emploi supprimée avec succès" });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: "Erreur lors de la suppression de l'offre" });
     }
-    
-    await knex('job_offers').where({ id: req.params.id }).delete();
-    res.json({ message: 'Offre d\'emploi supprimée avec succès' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la suppression de l\'offre' });
-  }
-});
-
+  },
+);
 
 // Routes pour les candidatures
 
@@ -336,33 +399,37 @@ app.delete('/job-offers/:id', authenticateToken, isEmployer, async (req, res) =>
 app.post('/job-offers/:id/apply', authenticateToken, async (req, res) => {
   try {
     const { cover_letter, resume_url } = req.body;
-    
+
     // Vérifier que l'offre existe et est active
     const offer = await knex('job_offers')
       .where({ id: req.params.id, is_active: true })
       .first();
-    
+
     if (!offer) {
-      return res.status(404).json({ error: 'Offre d\'emploi introuvable' });
+      return res.status(404).json({ error: "Offre d'emploi introuvable" });
     }
-    
+
     // Vérifier que l'étudiant n'a pas déjà postulé
     const existingApplication = await knex('applications')
       .where({ job_offer_id: req.params.id, student_id: req.user.userId })
       .first();
-    
+
     if (existingApplication) {
-      return res.status(400).json({ error: 'Vous avez déjà postulé à cette offre' });
+      return res
+        .status(400)
+        .json({ error: 'Vous avez déjà postulé à cette offre' });
     }
-    
+
     const [applicationId] = await knex('applications').insert({
       job_offer_id: req.params.id,
       student_id: req.user.userId,
       cover_letter,
-      resume_url
+      resume_url,
     });
-    
-    const application = await knex('applications').where({ id: applicationId }).first();
+
+    const application = await knex('applications')
+      .where({ id: applicationId })
+      .first();
     res.status(201).json(application);
   } catch (err) {
     console.error(err);
@@ -380,77 +447,100 @@ app.get('/applications/student', authenticateToken, async (req, res) => {
         'applications.*',
         'job_offers.title',
         'job_offers.company',
-        'job_offers.location'
+        'job_offers.location',
       )
       .orderBy('applications.applied_at', 'desc');
-    
+
     res.json(applications);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des candidatures' });
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des candidatures' });
   }
 });
 
 // Obtenir les candidatures pour une offre d'emploi (employeur seulement)
-app.get('/job-offers/:id/applications', authenticateToken, isEmployer, async (req, res) => {
-  try {
-    const offer = await knex('job_offers')
-      .where({ id: req.params.id, employer_id: req.user.userId })
-      .first();
-    
-    if (!offer) {
-      return res.status(404).json({ error: 'Offre d\'emploi introuvable ou non autorisée' });
+app.get(
+  '/job-offers/:id/applications',
+  authenticateToken,
+  isEmployer,
+  async (req, res) => {
+    try {
+      const offer = await knex('job_offers')
+        .where({ id: req.params.id, employer_id: req.user.userId })
+        .first();
+
+      if (!offer) {
+        return res
+          .status(404)
+          .json({ error: "Offre d'emploi introuvable ou non autorisée" });
+      }
+
+      const applications = await knex('applications')
+        .join('users', 'applications.student_id', 'users.id')
+        .where('applications.job_offer_id', req.params.id)
+        .select(
+          'applications.*',
+          'users.first_name',
+          'users.last_name',
+          'users.email',
+          'users.location',
+          'users.skills',
+        )
+        .orderBy('applications.applied_at', 'desc');
+
+      res.json(applications);
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: 'Erreur lors de la récupération des candidatures' });
     }
-    
-    const applications = await knex('applications')
-      .join('users', 'applications.student_id', 'users.id')
-      .where('applications.job_offer_id', req.params.id)
-      .select(
-        'applications.*',
-        'users.first_name',
-        'users.last_name',
-        'users.email',
-        'users.location',
-        'users.skills'
-      )
-      .orderBy('applications.applied_at', 'desc');
-    
-    res.json(applications);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des candidatures' });
-  }
-});
+  },
+);
 
 // Mettre à jour le statut d'une candidature (employeur seulement)
-app.put('/applications/:id/status', authenticateToken, isEmployer, async (req, res) => {
-  try {
-    const { status, employer_notes } = req.body;
-    
-    const application = await knex('applications')
-      .join('job_offers', 'applications.job_offer_id', 'job_offers.id')
-      .where({ 'applications.id': req.params.id, 'job_offers.employer_id': req.user.userId })
-      .first();
-    
-    if (!application) {
-      return res.status(404).json({ error: 'Candidature introuvable ou non autorisée' });
-    }
-    
-    await knex('applications')
-      .where({ id: req.params.id })
-      .update({
+app.put(
+  '/applications/:id/status',
+  authenticateToken,
+  isEmployer,
+  async (req, res) => {
+    try {
+      const { status, employer_notes } = req.body;
+
+      const application = await knex('applications')
+        .join('job_offers', 'applications.job_offer_id', 'job_offers.id')
+        .where({
+          'applications.id': req.params.id,
+          'job_offers.employer_id': req.user.userId,
+        })
+        .first();
+
+      if (!application) {
+        return res
+          .status(404)
+          .json({ error: 'Candidature introuvable ou non autorisée' });
+      }
+
+      await knex('applications').where({ id: req.params.id }).update({
         status,
         employer_notes,
-        updated_at: knex.fn.now()
+        updated_at: knex.fn.now(),
       });
-    
-    const updatedApplication = await knex('applications').where({ id: req.params.id }).first();
-    res.json(updatedApplication);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
-  }
-});
+
+      const updatedApplication = await knex('applications')
+        .where({ id: req.params.id })
+        .first();
+      res.json(updatedApplication);
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: 'Erreur lors de la mise à jour du statut' });
+    }
+  },
+);
 
 // Routes d'administration
 
@@ -463,10 +553,10 @@ app.get('/admin/job-offers', authenticateToken, isAdmin, async (req, res) => {
         'job_offers.*',
         'users.first_name as employer_first_name',
         'users.last_name as employer_last_name',
-        'users.email as employer_email'
+        'users.email as employer_email',
       )
       .orderBy('job_offers.created_at', 'desc');
-    
+
     // Ajouter le nombre de candidatures pour chaque offre
     for (let offer of offers) {
       const applicationsCount = await knex('applications')
@@ -475,57 +565,84 @@ app.get('/admin/job-offers', authenticateToken, isAdmin, async (req, res) => {
         .first();
       offer.applications_count = applicationsCount.count;
     }
-    
+
     res.json(offers);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des offres' });
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des offres' });
   }
 });
 
-// Mettre à jour le statut d'une offre d'emploi (admin seulement)
-app.put('/admin/job-offers/:id/status', authenticateToken, isAdmin, async (req, res) => {
-  try {
-    const { is_active } = req.body;
-    
-    const offer = await knex('job_offers').where({ id: req.params.id }).first();
-    
-    if (!offer) {
-      return res.status(404).json({ error: 'Offre d\'emploi introuvable' });
-    }
-    
-    await knex('job_offers')
-      .where({ id: req.params.id })
-      .update({
+// Update le statut d'une offre d'emploi (admin seulement)
+app.put(
+  '/admin/job-offers/:id/status',
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { is_active } = req.body;
+
+      const offer = await knex('job_offers')
+        .where({ id: req.params.id })
+        .first();
+
+      if (!offer) {
+        return res.status(404).json({ error: "Offre d'emploi introuvable" });
+      }
+
+      await knex('job_offers').where({ id: req.params.id }).update({
         is_active,
-        updated_at: knex.fn.now()
+        updated_at: knex.fn.now(),
       });
-    
-    const updatedOffer = await knex('job_offers').where({ id: req.params.id }).first();
-    res.json(updatedOffer);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
-  }
-});
+
+      const updatedOffer = await knex('job_offers')
+        .where({ id: req.params.id })
+        .first();
+      res.json(updatedOffer);
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: 'Erreur lors de la mise à jour du statut' });
+    }
+  },
+);
 
 // Obtenir les statistiques globales (admin seulement)
 app.get('/admin/stats', authenticateToken, isAdmin, async (req, res) => {
   try {
     const stats = {
       total_users: await knex('users').count('* as count').first(),
-      total_employers: await knex('users').where({ role: 'employer' }).count('* as count').first(),
-      total_students: await knex('users').where({ role: 'student' }).count('* as count').first(),
+      total_employers: await knex('users')
+        .where({ role: 'employer' })
+        .count('* as count')
+        .first(),
+      total_students: await knex('users')
+        .where({ role: 'student' })
+        .count('* as count')
+        .first(),
       total_job_offers: await knex('job_offers').count('* as count').first(),
-      active_job_offers: await knex('job_offers').where({ is_active: true }).count('* as count').first(),
-      total_applications: await knex('applications').count('* as count').first(),
-      pending_applications: await knex('applications').where({ status: 'pending' }).count('* as count').first()
+      active_job_offers: await knex('job_offers')
+        .where({ is_active: true })
+        .count('* as count')
+        .first(),
+      total_applications: await knex('applications')
+        .count('* as count')
+        .first(),
+      pending_applications: await knex('applications')
+        .where({ status: 'pending' })
+        .count('* as count')
+        .first(),
     };
-    
+
     res.json(stats);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des statistiques' });
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des statistiques' });
   }
 });
 
@@ -535,40 +652,47 @@ app.get('/admin/users', authenticateToken, isAdmin, async (req, res) => {
     const users = await knex('users')
       .select('id', 'email', 'first_name', 'last_name', 'role', 'created_at')
       .orderBy('created_at', 'desc');
-    
+
     res.json(users);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des utilisateurs' });
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des utilisateurs' });
   }
 });
 
-// Mettre à jour le rôle d'un utilisateur (admin seulement)
-app.put('/admin/users/:id/role', authenticateToken, isAdmin, async (req, res) => {
-  try {
-    const { role } = req.body;
-    
-    if (!['student', 'employer', 'admin'].includes(role)) {
-      return res.status(400).json({ error: 'Rôle invalide' });
+// Update le rôle d'un utilisateur (admin seulement)
+app.put(
+  '/admin/users/:id/role',
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { role } = req.body;
+
+      if (!['student', 'employer', 'admin'].includes(role)) {
+        return res.status(400).json({ error: 'Rôle invalide' });
+      }
+
+      const user = await knex('users').where({ id: req.params.id }).first();
+
+      if (!user) {
+        return res.status(404).json({ error: 'Utilisateur introuvable' });
+      }
+
+      await knex('users').where({ id: req.params.id }).update({ role });
+
+      const updatedUser = await knex('users')
+        .where({ id: req.params.id })
+        .first();
+      res.json(updatedUser);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Erreur lors de la mise à jour du rôle' });
     }
-    
-    const user = await knex('users').where({ id: req.params.id }).first();
-    
-    if (!user) {
-      return res.status(404).json({ error: 'Utilisateur introuvable' });
-    }
-    
-    await knex('users')
-      .where({ id: req.params.id })
-      .update({ role });
-    
-    const updatedUser = await knex('users').where({ id: req.params.id }).first();
-    res.json(updatedUser);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du rôle' });
-  }
-});
+  },
+);
 
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur http://localhost:3001`);

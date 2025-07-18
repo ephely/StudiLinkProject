@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('stats');
@@ -7,7 +6,7 @@ function AdminDashboard() {
   const [jobOffers, setJobOffers] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+
 
   useEffect(() => {
     fetchStats();
@@ -15,6 +14,7 @@ function AdminDashboard() {
     fetchUsers();
   }, []);
 
+  {/* Récupération des statistiques globales */}
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -33,6 +33,7 @@ function AdminDashboard() {
     }
   };
 
+  {/* Récupération offres d'emploi */}
   const fetchJobOffers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -53,6 +54,7 @@ function AdminDashboard() {
     }
   };
 
+  {/* Récupération utilisateurs */}
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -71,17 +73,21 @@ function AdminDashboard() {
     }
   };
 
+  {/* Activation/Désactivation offre */}
   const toggleJobOfferStatus = async (offerId, currentStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/admin/job-offers/${offerId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:3001/admin/job-offers/${offerId}/status`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ is_active: !currentStatus }),
         },
-        body: JSON.stringify({ is_active: !currentStatus }),
-      });
+      );
 
       if (response.ok) {
         // Mettre à jour la liste des offres
@@ -92,17 +98,21 @@ function AdminDashboard() {
     }
   };
 
+  {/* Changement de rôle utilisateur */}
   const updateUserRole = async (userId, newRole) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/admin/users/${userId}/role`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:3001/admin/users/${userId}/role`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ role: newRole }),
         },
-        body: JSON.stringify({ role: newRole }),
-      });
+      );
 
       if (response.ok) {
         // Mettre à jour la liste des utilisateurs
@@ -113,12 +123,13 @@ function AdminDashboard() {
     }
   };
 
+  {/* Formatage des labels */}
   const getJobTypeLabel = (type) => {
     const types = {
       internship: 'Internship',
       part_time: 'Part-time',
       full_time: 'Full-time',
-      freelance: 'Freelance'
+      freelance: 'Freelance',
     };
     return types[type] || type;
   };
@@ -127,65 +138,52 @@ function AdminDashboard() {
     const roles = {
       student: 'Student',
       employer: 'Employer',
-      admin: 'Admin'
+      admin: 'Admin',
     };
     return roles[role] || role;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading admin dashboard...</p>
+      <div className="admin-dashboard-loading">
+        <div className="admin-dashboard-loading-center">
+          <div className="admin-spinner"></div>
+          <p className="admin-loading-text">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="admin-dashboard">
+      <div className="admin-dashboard-container">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600">
+        <div className="admin-header">
+          <h1 className="admin-title">Admin Dashboard</h1>
+          <p className="admin-subtitle">
             Manage job offers, users, and view platform statistics
           </p>
         </div>
 
         {/* Navigation tabs */}
-        <div className="mb-8">
-          <nav className="flex space-x-8">
+        <div className="admin-tabs">
+          <nav className="admin-tabs-nav">
+            {/* Onglets de navigation */}
             <button
               onClick={() => setActiveTab('stats')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'stats'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`admin-tab-btn${activeTab === 'stats' ? ' active' : ''}`}
             >
               Statistics
             </button>
             <button
               onClick={() => setActiveTab('job-offers')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'job-offers'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`admin-tab-btn${activeTab === 'job-offers' ? ' active' : ''}`}
             >
               Job Offers
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'users'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`admin-tab-btn${activeTab === 'users' ? ' active' : ''}`}
             >
               Users
             </button>
@@ -193,240 +191,128 @@ function AdminDashboard() {
         </div>
 
         {/* Content */}
+        {/* Stats */}
         {activeTab === 'stats' && stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">👥</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.total_users.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+          <div className="admin-stats-grid">
+            {/* Cartes de statistiques */}
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-blue">👥</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Total Users</div>
+                <div className="admin-card-value">{stats.total_users.count}</div>
               </div>
             </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">💼</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Employers</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.total_employers.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-green">💼</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Employers</div>
+                <div className="admin-card-value">{stats.total_employers.count}</div>
               </div>
             </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">🎓</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Students</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.total_students.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-purple">🎓</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Students</div>
+                <div className="admin-card-value">{stats.total_students.count}</div>
               </div>
             </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">📋</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Job Offers</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.total_job_offers.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-yellow">📋</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Job Offers</div>
+                <div className="admin-card-value">{stats.total_job_offers.count}</div>
               </div>
             </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">✅</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Active Offers</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.active_job_offers.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-green">✅</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Active Offers</div>
+                <div className="admin-card-value">{stats.active_job_offers.count}</div>
               </div>
             </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">📝</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Applications</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.total_applications.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-indigo">📝</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Applications</div>
+                <div className="admin-card-value">{stats.total_applications.count}</div>
               </div>
             </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">⏳</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Pending Apps</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.pending_applications.count}</dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="admin-card">
+              <div className="admin-card-icon admin-card-icon-orange">⏳</div>
+              <div className="admin-card-content">
+                <div className="admin-card-label">Pending Apps</div>
+                <div className="admin-card-value">{stats.pending_applications.count}</div>
               </div>
             </div>
           </div>
         )}
 
+        {/* Gestion des offres */}
         {activeTab === 'job-offers' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Job Offers Management</h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">Manage all job offers on the platform</p>
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <h3 className="admin-section-title">Job Offers Management</h3>
+              <p className="admin-section-desc">Manage all job offers on the platform</p>
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="admin-list">
+              
               {jobOffers.map((offer) => (
-                <li key={offer.id} className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-blue-600 truncate">
-                          {offer.title}
-                        </p>
-                        <div className="ml-2 flex-shrink-0 flex">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            offer.is_active 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {offer.is_active ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <span className="truncate">{offer.company}</span>
-                          <span className="mx-2">•</span>
-                          <span>{offer.location}</span>
-                          <span className="mx-2">•</span>
-                          <span>{getJobTypeLabel(offer.job_type)}</span>
-                          <span className="mx-2">•</span>
-                          <span>{offer.applications_count} applications</span>
-                        </div>
-                      </div>
-                      <div className="mt-1 text-sm text-gray-500">
-                        Posted by: {offer.employer_first_name} {offer.employer_last_name} ({offer.employer_email})
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <button
-                        onClick={() => toggleJobOfferStatus(offer.id, offer.is_active)}
-                        className={`px-3 py-1 text-sm font-medium rounded-md ${
-                          offer.is_active
-                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        }`}
-                      >
-                        {offer.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
-                    </div>
+                <li key={offer.id} className="admin-list-item">
+                  <div className="admin-list-main">
+                    <div className="admin-list-title">{offer.title}</div>
+                    <div className={`admin-badge${offer.is_active ? ' active' : ' inactive'}`}>{offer.is_active ? 'Active' : 'Inactive'}</div>
                   </div>
+                  <div className="admin-list-details">
+                    <span>{offer.company}</span>
+                    <span>•</span>
+                    <span>{offer.location}</span>
+                    <span>•</span>
+                    <span>{getJobTypeLabel(offer.job_type)}</span>
+                    <span>•</span>
+                    <span>{offer.applications_count} applications</span>
+                  </div>
+                  <div className="admin-list-meta">Posted by: {offer.employer_first_name} {offer.employer_last_name} ({offer.employer_email})</div>
+                  <button
+                    onClick={() => toggleJobOfferStatus(offer.id, offer.is_active)}
+                    className={`admin-action-btn${offer.is_active ? ' deactivate' : ' activate'}`}
+                  >
+                    {offer.is_active ? 'Deactivate' : 'Activate'}
+                  </button>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
+        {/* Gestion utilisateurs */}
         {activeTab === 'users' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Users Management</h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">Manage user roles and permissions</p>
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <h3 className="admin-section-title">Users Management</h3>
+              <p className="admin-section-desc">Manage user roles and permissions</p>
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="admin-list">
+            
               {users.map((user) => (
-                <li key={user.id} className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-blue-600 truncate">
-                          {user.first_name} {user.last_name}
-                        </p>
-                        <div className="ml-2 flex-shrink-0 flex">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                            user.role === 'employer' ? 'bg-green-100 text-green-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {getRoleLabel(user.role)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <span className="truncate">{user.email}</span>
-                          <span className="mx-2">•</span>
-                          <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <select
-                        value={user.role}
-                        onChange={(e) => updateUserRole(user.id, e.target.value)}
-                        className="block w-full px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="student">Student</option>
-                        <option value="employer">Employer</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </div>
+                <li key={user.id} className="admin-list-item">
+                  <div className="admin-list-main">
+                    <div className="admin-list-title">{user.first_name} {user.last_name}</div>
+                    <div className={`admin-badge role-${user.role}`}>{getRoleLabel(user.role)}</div>
                   </div>
+                  <div className="admin-list-details">
+                    <span className="admin-list-email">{user.email}</span>
+                    <span>•</span>
+                    <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <select
+                    value={user.role}
+                    onChange={(e) => updateUserRole(user.id, e.target.value)}
+                    className="admin-role-select"
+                  >
+                    <option value="student">Student</option>
+                    <option value="employer">Employer</option>
+                    <option value="admin">Admin</option>
+                  </select>
                 </li>
               ))}
             </ul>
@@ -437,4 +323,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard; 
+export default AdminDashboard;

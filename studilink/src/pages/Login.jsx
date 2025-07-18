@@ -35,12 +35,9 @@ export default function Login() {
   };
 
   return (
-    <main style={{ padding: '2rem', maxWidth: '400px', margin: 'auto' }}>
-      <h2 style={{ color: '#4fa4ff' }}>Login</h2>
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-      >
+    <div className="login-container">
+      <h2 className="login-title">Login</h2>
+      <form className="login-form" onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
@@ -59,6 +56,6 @@ export default function Login() {
           Sign In
         </button>
       </form>
-    </main>
+    </div>
   );
 }

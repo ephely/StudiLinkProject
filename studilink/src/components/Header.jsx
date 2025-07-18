@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import StudiLinkLogo from '../assets/StudiLinkLogo.png';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function Header() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
-    
+
     if (token) {
       // Récupérer les informations de l'utilisateur
       fetchUserProfile();
@@ -22,10 +23,10 @@ export default function Header() {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3001/profile', {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       if (response.ok) {
         const user = await response.json();
         setUserRole(user.role);
@@ -50,14 +51,18 @@ export default function Header() {
         <div className="header-content">
           {/* Logo */}
           <Link to="/" className="logo">
-            <h1>StudiLink</h1>
+            <img
+              src={StudiLinkLogo}
+              alt="StudiLink Logo"
+              style={{ height: '150px' }}
+            />
           </Link>
 
           {/* Navigation */}
           <nav className="nav-menu">
             <Link to="/">Home</Link>
             <Link to="/offers">Job Offers</Link>
-            
+
             {isAuthenticated && userRole === 'employer' && (
               <Link to="/create-offer" className="publish-button">
                 Post a Job
@@ -80,7 +85,9 @@ export default function Header() {
                       <img src={userProfile.avatar} alt="Avatar" />
                     ) : (
                       <div className="avatar-placeholder">
-                        {userProfile?.firstName?.charAt(0) || userProfile?.email?.charAt(0) || 'U'}
+                        {userProfile?.firstName?.charAt(0) ||
+                          userProfile?.email?.charAt(0) ||
+                          'U'}
                       </div>
                     )}
                   </div>
@@ -91,9 +98,14 @@ export default function Header() {
                 </button>
               </>
             ) : (
-              <Link to="/login" className="login-button">
-                Login
-              </Link>
+              <>
+                <Link to="/login" className="login-button">
+                  Login
+                </Link>
+                <Link to="/register" className="register-button" style={{ marginLeft: '1rem' }}>
+                  Register
+                </Link>
+              </>
             )}
           </div>
         </div>

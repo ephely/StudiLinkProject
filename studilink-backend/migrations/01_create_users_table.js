@@ -1,23 +1,12 @@
 exports.up = function (knex) {
-  return knex.schema.table('users', function (table) {
-    table.string('first_name');
-    table.string('last_name');
-    table.string('location');
-    table.string('skills');
-    table.text('bio');
-    table.string('avatar_url');
+  return knex.schema.createTable('users', function (table) {
+    table.increments('id').primary();
+    table.string('email').unique().notNullable();
+    table.string('password').notNullable();
+    table.timestamps(true, true);
   });
 };
 
 exports.down = function (knex) {
-  return knex.schema.table('users', function (table) {
-    table.dropColumns(
-      'first_name',
-      'last_name',
-      'location',
-      'skills',
-      'bio',
-      'avatar_url',
-    );
-  });
+  return knex.schema.dropTable('users');
 };
